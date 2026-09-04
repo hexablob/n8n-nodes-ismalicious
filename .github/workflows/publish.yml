@@ -1,0 +1,74 @@
+name: Publish to npm
+
+# Publishes `n8n-nodes-ismalicious` with sigstore provenance.
+#
+# This package lives in its own public repository for one reason: npm refuses
+# to verify a provenance bundle whose source repository is private, and n8n's
+# Creator Portal requires provenance for verified community nodes. The node
+# itself is developed in the ismalicious.com monorepo under
+# `packages/n8n-nodes-ismalicious` and mirrored here on release.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version already set in package.json (e.g. 0.1.0)"
+        required: false
+        type: string
+
+# `id-token: write` is what lets npm mint the provenance statement from the
+# GitHub OIDC identity. Without it the publish falls back to no provenance.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm install --no-package-lock
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # n8n loads the node and its credential from the paths declared in the
+      # `n8n` field; a build that silently dropped either would install and
+      # then fail at runtime inside the editor.
+      - name: Verify the declared entry points exist
+        run: |
+          node -e "
+            const pkg = require('./package.json');
+            const fs = require('node:fs');
+            for (const p of [...pkg.n8n.nodes, ...pkg.n8n.credentials]) {
+              if (!fs.existsSync(p)) { console.error('missing: ' + p); process.exit(1); }
+              console.log('ok: ' + p);
+            }
+            if (!fs.existsSync('dist/nodes/IsMalicious/ismalicious.svg')) {
+              console.error('missing node icon'); process.exit(1);
+            }
+            console.log('ok: dist/nodes/IsMalicious/ismalicious.svg');
+          "
+
+      - name: Publish to npm with provenance
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

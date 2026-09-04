@@ -1,0 +1,52 @@
+{
+  "name": "n8n-nodes-ismalicious",
+  "version": "0.1.0",
+  "description": "n8n node to look up IPs, domains, and URLs on isMalicious",
+  "license": "MIT",
+  "homepage": "https://ismalicious.com/integrations/n8n",
+  "author": "isMalicious",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexablob/n8n-nodes-ismalicious.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hexablob/n8n-nodes-ismalicious/issues"
+  },
+  "main": "dist/nodes/IsMalicious/IsMalicious.node.js",
+  "keywords": [
+    "n8n-community-node-package",
+    "threat-intelligence",
+    "ismalicious"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/IsMaliciousApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/IsMalicious/IsMalicious.node.js"
+    ]
+  },
+  "scripts": {
+    "build": "tsc && node -e \"require('node:fs').copyFileSync('nodes/IsMalicious/ismalicious.svg','dist/nodes/IsMalicious/ismalicious.svg')\"",
+    "prepublishOnly": "npm test && npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
