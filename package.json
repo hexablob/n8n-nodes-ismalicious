@@ -1,10 +1,14 @@
 {
   "name": "n8n-nodes-ismalicious",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n node to look up IPs, domains, and URLs on isMalicious",
   "license": "MIT",
   "homepage": "https://ismalicious.com/integrations/n8n",
-  "author": "isMalicious",
+  "author": {
+    "name": "isMalicious",
+    "email": "contact@ismalicious.com",
+    "url": "https://ismalicious.com"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hexablob/n8n-nodes-ismalicious.git"
@@ -21,6 +25,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "n8n": {
@@ -34,13 +39,19 @@
   },
   "scripts": {
     "build": "tsc && node -e \"require('node:fs').copyFileSync('nodes/IsMalicious/ismalicious.svg','dist/nodes/IsMalicious/ismalicious.svg')\"",
-    "prepublishOnly": "npm test && npm run build",
+    "lint": "node scripts/scan-package.mjs --source",
+    "scan": "npm run build && node scripts/scan-package.mjs",
+    "prepublishOnly": "npm test && npm run lint && npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "n8n-workflow": "^2.16.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
   },
   "engines": {
     "node": ">=18"
